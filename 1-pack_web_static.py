@@ -5,23 +5,22 @@ from datetime import datetime
 
 @task
 def do_pack(ctx):
-    """Archives the static files."""
-    if not os.path.isdir("versions"):
-        os.mkdir("versions")
-    d_time = datetime.now()
-    output = "versions/web_static_{}{}{}{}{}{}.tgz".format(
-        d_time.year,
-        d_time.month,
-        d_time.day,
-        d_time.hour,
-        d_time.minute,
-        d_time.second
+    """Create a .tgz archive from the contents of the web_static folder."""
+    if not os.path.exists("versions"):
+        os.makedirs("versions")
+
+    dt = datetime.utcnow()
+    archive_name = "web_static_{}{}{}{}{}{}.tgz".format(
+        dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second
     )
+    archive_path = os.path.join("versions", archive_name)
+
     try:
-        print("Packing web_static to {}".format(output))
-        ctx.run("tar -cvzf {} web_static".format(output))
-        size = os.stat(output).st_size
-        print("web_static packed: {} -> {} Bytes".format(output, size))
-    except Exception:
-        output = None
-    return output
+        print("Packing web_static to {}".format(archive_path))
+        ctx.run("tar -cvzf {} web_static".format(archive_path))
+        size = os.stat(archive_path).st_size
+        print("web_static packed: {} -> {} Bytes".format(archive_path, size))
+        return archive_path
+    except Exception as e:
+        print("Error creating archive:", str(e))
+        return None
